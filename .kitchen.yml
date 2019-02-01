@@ -1,26 +1,35 @@
----
 driver:
   name: vagrant
+  boot_timeout: 1200
+  gui: false
 
 provisioner:
   name: chef_zero
-  # You may wish to disable always updating cookbooks in CI or other testing environments.
-  # For example:
-  #   always_update_cookbooks: <%= !ENV['CI'] %>
   always_update_cookbooks: true
 
 verifier:
   name: inspec
 
+transport:
+  name: winrm
+  elevated: true
+
 platforms:
-  - name: ubuntu-16.04
-  - name: centos-7
+  - name: windows-2019
+    driver_config:
+      box: tas50/windows_2019
+    driver:
+      vm_hostname: windows
+      network:
+        - ["private_network", {ip: "192.168.33.38"}]
+      customize:
+        memory: 2048
 
 suites:
   - name: default
     run_list:
-      - recipe[aws_win2019::default]
+      - recipe[Windows_memberserver_2019_Security_baseline::default]
     verifier:
       inspec_tests:
-        - test/integration/default
+        - test/smoke/default/
     attributes:
